@@ -18,26 +18,27 @@ namespace influxdb_client_csharp
             this.options = options.CurrentValue;
         }
 
-        public Task AddAsync(Book book)
+        public Task AddAsync(Book2 book)
         {
             var api = this.infuxdb.GetWriteApiAsync();
-            return api.WriteMeasurementAsync(options.DefaultBucket, options.DefaultOrg, WritePrecision.Ns, book);
+            //return api.WriteMeasurementAsync(options.DefaultBucket, options.DefaultOrg, WritePrecision.Ns, book);
+            return api.WriteMeasurementAsync(book, WritePrecision.Ns, options.DefaultBucket, options.DefaultOrg);
         }
 
-        public async Task<List<Book>> GetBooksAsync()
+        public async Task<List<Book2>> GetBooksAsync()
         {
             // 这里借用Influxdb2.Client的Flux对象辅助生成查询字符串
             var flux = Flux
                 .From(options.DefaultBucket)
                 .Range("-3d")
-                .Filter(FnBody.R.MeasurementEquals($"{nameof(Book)}"))
+                .Filter(FnBody.R.MeasurementEquals($"{nameof(Book2)}"))
                 .Pivot()
                 .Sort(Columns.Time, desc: true)
                 .Limit(10)
                 ;
 
             var api = this.infuxdb.GetQueryApi();
-            return await api.QueryAsync<Book>(flux.ToString(), options.DefaultOrg);
+            return await api.QueryAsync<Book2>(flux.ToString(), options.DefaultOrg);
         }
     }
 }

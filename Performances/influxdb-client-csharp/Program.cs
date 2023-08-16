@@ -32,7 +32,7 @@ namespace influxdb_client_csharp
                         .AddTransient(sp =>
                         {
                             var opt = sp.GetRequiredService<IOptionsMonitor<InfuxdbOptions>>().CurrentValue;
-                            return InfluxDBClientFactory.Create(opt.Host.ToString(), opt.Token);
+                            return new InfluxDBClient(opt.Host.ToString(), opt.Token);
                         });
                 });
         }

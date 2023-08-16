@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -29,7 +30,7 @@ namespace influxdb_client_csharp
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
 
-                var tasks = Enumerable.Range(0, count).Select(i => ReadWriteAsync());
+                var tasks = Enumerable.Range(0, count).Select(i => ReadAsync());
                 await Task.WhenAll(tasks);
 
                 stopwatch.Stop();
@@ -41,18 +42,47 @@ namespace influxdb_client_csharp
             }
         }
 
-
-        private async Task ReadWriteAsync()
+        private async Task ReadAsync()
         {
             using var scope = scopeFactory.CreateScope();
             var service = scope.ServiceProvider.GetRequiredService<BookService>();
-            var book = new Book
+           
+            var books = await service.GetBooksAsync();
+
+            foreach (var book in books)
+            {
+                Console.WriteLine(JsonConvert.SerializeObject(book));
+            }
+        }
+
+        private async Task WriteAsync()
+        {
+            using var scope = scopeFactory.CreateScope();
+            var service = scope.ServiceProvider.GetRequiredService<BookService>();
+            var book = new Book2
             {
                 Serie = "科幻",
                 Name = $"{random.Next(1, 100)}体",
                 Price = random.NextDouble() * 100d,
                 SpecialOffer = random.NextDouble() < 0.5d,
-                Time = DateTime.UtcNow
+                CreateTime = DateTime.UtcNow
+            };
+
+            await service.AddAsync(book);
+           
+        }
+
+        private async Task ReadWriteAsync()
+        {
+            using var scope = scopeFactory.CreateScope();
+            var service = scope.ServiceProvider.GetRequiredService<BookService>();
+            var book = new Book2
+            {
+                Serie = "科幻",
+                Name = $"{random.Next(1, 100)}体",
+                Price = random.NextDouble() * 100d,
+                SpecialOffer = random.NextDouble() < 0.5d,
+                CreateTime = DateTime.UtcNow
             };
 
             await service.AddAsync(book);

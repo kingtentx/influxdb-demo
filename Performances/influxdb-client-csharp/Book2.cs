@@ -3,8 +3,8 @@ using System;
 
 namespace influxdb_client_csharp
 {
-    [Measurement("Book")]
-    class Book
+    [Measurement("Book2")]
+    class Book2
     {
         [Column("Serie", IsTag = true)]
         public string Serie { get; set; }
@@ -22,7 +22,7 @@ namespace influxdb_client_csharp
         public bool? SpecialOffer { get; set; }
 
 
-        [Column("Time", IsTimestamp = true)]
-        public DateTime Time { get; set; }
+        [Column("CreateTime", IsTimestamp = true)]
+        public DateTime CreateTime { get; set; }
     }
 }

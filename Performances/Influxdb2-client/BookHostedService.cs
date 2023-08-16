@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace influxdb2_client
 {
@@ -30,7 +31,7 @@ namespace influxdb2_client
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
 
-                var tasks = Enumerable.Range(0, count).Select(i => ReadWriteAsync());
+                var tasks = Enumerable.Range(0, count).Select(i => ReadAsync());
                 await Task.WhenAll(tasks);
 
                 stopwatch.Stop();
@@ -42,6 +43,34 @@ namespace influxdb2_client
             }
         }
 
+        private async Task ReadAsync()
+        {
+            using var scope = scopeFactory.CreateScope();
+            var service = scope.ServiceProvider.GetRequiredService<BookService>();
+
+            var books = await service.GetBooksAsync();
+            foreach (var book in books)
+            {
+                Console.WriteLine(JsonConvert.SerializeObject(book));
+            }
+        }
+
+        private async Task WriteAsync()
+        {
+            using var scope = scopeFactory.CreateScope();
+            var service = scope.ServiceProvider.GetRequiredService<BookService>();
+            var book = new Book
+            {
+                Serie = "科幻",
+                Name = $"{random.Next(1, 100)}体",
+                Price = random.NextDouble() * 100d,
+                SpecialOffer = random.NextDouble() < 0.5d,
+                CreateTime = DateTimeOffset.Now
+            };
+
+            await service.AddAsync(book);
+
+        }
 
         private async Task ReadWriteAsync()
         {
