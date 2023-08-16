@@ -1,8 +1,5 @@
-# Influxdb2.Client
-Influxdb2读写性能最快的dotnet客户端，读写性能为官方客户端库的180%(本机mock Influxdb服务器，完整的读写流程)
+# Influxdb2 demo
 
-> 
-```
 dotnet add package Influxdb2.Client
 ```
 ### 服务注册
@@ -63,19 +60,3 @@ class Book
 }
 ```
 
-### 读取数据
-
-```
-var flux = Flux
-    .From(defaultBucket)
-    .Range("-3d")
-    .Filter(FnBody.R.MeasurementEquals($"{nameof(Book)}"))
-    .Pivot()
-    .Sort(Columns.Time, desc: true)
-    .Limit(10)
-    ;
-
-var tables = await infuxdb.QueryAsync(flux);
-// 可以映射为任意模型（未必是Book)
-var books = tables.Single().ToModels<Book>();
-```
